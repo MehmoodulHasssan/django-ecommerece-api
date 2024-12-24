@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, serializers, status
+from rest_framework import generics, permissions, serializers, status, parsers
 from rest_framework.response import Response
 from .models import Product, Order, OrderItem
 from django.contrib.auth.models import User
@@ -12,9 +12,14 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class ProductsView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser]
     
     def get_queryset(self):
-        return Product.objects.only('name', 'price', 'image').order_by('created_at')
+       return Product.objects.only('name', 'price', 'image').order_by('created_at')
+    
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
 class ProductView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
@@ -51,6 +56,12 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
     queryset = User.objects.all()
+
+class CreateOrderItem(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = OrderItem.objects.all()
+
+    
 
         
 

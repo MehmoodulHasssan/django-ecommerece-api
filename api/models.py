@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
+import uuid
 
 # Create your models here.
 class Product(models.Model):
@@ -29,7 +30,7 @@ class Order(models.Model):
         PENDING = 'Pending'
         CONFIRMED = 'Confirmed'
         CANCELLED = 'Cancelled'
-
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4, unique=True)
     customer = models.ForeignKey(User, on_delete=models.CASCADE) #its many to one relationship
     orderItems = models.ManyToManyField(Product, through="OrderItem", related_name="orders")
     status = models.CharField(
@@ -41,10 +42,8 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Order {self.order_id } by @{self.user.username}"
+        return f"Order {self.id } by @{self.user.username}"
     
-    def __str__(self):
-        return f"Order of {self.product.name} by @{self.customer.username}"
     
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
