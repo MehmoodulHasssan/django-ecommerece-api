@@ -37,18 +37,31 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    #if we have to show the product details in the order item then we can use the below line
+    product = ProductListSerializer(read_only=True)
     class Meta:
         model = OrderItem
-        fields = "__all__"
+        fields = ('id', 'product', 'quantity', 'sub_total')
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = OrderItemSerializer(many=True, read_only=True)
+    order_items = OrderItemSerializer(many=True, read_only=True )
     class Meta:
         model = Order
         fields = ('id', 'customer', 'status', 'order_items')
 
-    
-    
+#lets define a generic serializer where we can check info about products
 
+class ProductInfoSerializer(serializers.Serializer):
+    products = ProductListSerializer(many=True)
+    count = serializers.IntegerField(read_only=True)
+    max_price = serializers.FloatField(read_only=True)
 
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #     print(representation)
+    #     products = instance['products']
+    #     representation['count'] = len(products)
+    #     representation['max_price'] = max(product['price'] for product in products)
+    #     return representation
+        

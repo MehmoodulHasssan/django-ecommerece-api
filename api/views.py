@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, serializers, status, parsers
+from rest_framework import generics, permissions, serializers, status, parsers, views
 from rest_framework.response import Response
 from .models import Product, Order, OrderItem
 from django.contrib.auth.models import User
-from .serializers import UserSerializer, ProductCreateSerializer, ProductListSerializer, OrderSerializer
+from .serializers import UserSerializer, ProductCreateSerializer, ProductListSerializer, OrderSerializer, ProductInfoSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
@@ -85,5 +85,24 @@ class ListOrders(generics.ListAPIView):
         return Order.objects.filter(customer=self.request.user)
 
 
+class ProductInfoView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    model = Product
+    queryset = Product.objects.all()
+    # serializer_class = ProductInfoSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        products = self.get_queryset()
+        count = products.count()
+        max_price = max(price for price in products.values_list('price', flat=True))
+        # print(args)
+
+        return ProductInfoSerializer({
+            "products" : products,
+            "count": count,
+            "max_price" : max_price
+        })
+
+    
 
 
