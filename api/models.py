@@ -31,8 +31,8 @@ class Order(models.Model):
         CONFIRMED = 'Confirmed'
         CANCELLED = 'Cancelled'
     id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4, unique=True)
-    customer = models.ForeignKey(User, on_delete=models.CASCADE) #its many to one relationship
-    orderItems = models.ManyToManyField(Product, through="OrderItem", related_name="orders")
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders") #its many to one relationship
+    products = models.ManyToManyField(Product, through="OrderItem", related_name="orders")
     status = models.CharField(
         max_length=10,
         choices=StatusChoices.choices,
@@ -42,12 +42,12 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Order {self.id } by @{self.user.username}"
+        return f"Order {self.id } by @{self.customer.username}"
     
     
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="order_items")
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
